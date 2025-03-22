@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fingerprint ATM System</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #2a5298;
+      font-weight: 600;
+    }
+
+    /* Fingerprint Scanner */
+    .fingerprint-scanner {
+      margin-bottom: 20px;
+    }
+
+    .scanner {
+      width: 100px;
+      height: 100px;
+      background-color: #e0e0e0;
+      border-radius: 50%;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .scanner:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+    }
+
+    .scanner::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 10%, transparent 10.01%);
+      background-size: 10px 10px;
+      animation: scan 2s infinite linear;
+    }
+
+    @keyframes scan {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    #scanner-status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Account Selection and ATM Options */
+    .account-selection, .atm-options {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2a5298;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #1e3c72;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Output Section */
+    .output {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #2a5298;
+      background-color: #f0f4f8;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #d0d8e0;
+    }
+
+    /* Animations */
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fingerprint ATM System</h1>
+    <div class="fingerprint-scanner">
+      <div class="scanner" id="scanner"></div>
+      <p id="scanner-status">Place your finger on the scanner</p>
+    </div>
+    <div class="account-selection" id="account-selection" style="display: none;">
+      <h2>Select Account Type</h2>
+      <button onclick="selectAccount('current')">Current Account</button>
+      <button onclick="selectAccount('savings')">Savings Account</button>
+      <button onclick="selectAccount('fd')">Fixed Deposit (FD)</button>
+    </div>
+    <div class="atm-options" id="atm-options" style="display: none;">
+      <h2 id="welcome-message"></h2>
+      <button onclick="viewBalance()">View Balance</button>
+      <button onclick="withdraw()">Withdraw</button>
+      <button onclick="deposit()">Deposit</button>
+      <button onclick="viewHistory()">View History</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div class="output" id="output"></div>
+  </div>
+
+  <script>
+    // Simulated user data
+let user = {
+  fingerprintRegistered: true,
+  accounts: {
+    current: { balance: 5000, history: [] },
+    savings: { balance: 10000, history: [] },
+    fd: { balance: 20000, history: [] },
+  },
+  selectedAccount: null,
+};
+
+// Simulate fingerprint scan
+document.getElementById("scanner").addEventListener("click", function () {
+  const scannerStatus = document.getElementById("scanner-status");
+  const accountSelection = document.getElementById("account-selection");
+  const output = document.getElementById("output");
+
+  // Randomly accept or reject fingerprint
+  const isAccepted = Math.random() < 0.7; // 70% chance of acceptance
+
+  if (isAccepted && user.fingerprintRegistered) {
+    // Fingerprint accepted
+    scannerStatus.textContent = "Fingerprint Accepted!";
+    scannerStatus.style.color = "green";
+    accountSelection.style.display = "block";
+    output.innerHTML = "";
+    animateScanner("accepted");
+  } else {
+    // Fingerprint rejected
+    scannerStatus.textContent = "Fingerprint Rejected!";
+    scannerStatus.style.color = "red";
+    accountSelection.style.display = "none";
+    output.innerHTML = "Access Denied. Please try again.";
+    animateScanner("rejected");
+  }
+});
+
+// Scanner animation
+function animateScanner(status) {
+  const scanner = document.getElementById("scanner");
+  scanner.style.animation = "none";
+  setTimeout(() => {
+    scanner.style.animation = status === "accepted" ? "pulse-green 1s" : "pulse-red 1s";
+  }, 10);
+}
+
+// Select account type
+function selectAccount(accountType) {
+  user.selectedAccount = accountType;
+  document.getElementById("account-selection").style.display = "none";
+  document.getElementById("atm-options").style.display = "block";
+  document.getElementById("welcome-message").textContent = `Welcome to ${accountType.toUpperCase()} Account!`;
+}
+
+// ATM Functions
+function viewBalance() {
+  const output = document.getElementById("output");
+  const account = user.accounts[user.selectedAccount];
+  output.innerHTML = `Your current balance is: $${account.balance}`;
+}
+
+function withdraw() {
+  const amount = parseFloat(prompt("Enter amount to withdraw:"));
+  const account = user.accounts[user.selectedAccount];
+  const output = document.getElementById("output");
+
+  if (amount > 0 && amount <= account.balance) {
+    account.balance -= amount;
+    account.history.push(`Withdrawn: $${amount}`);
+    output.innerHTML = `Withdrawal successful. New balance: $${account.balance}`;
+  } else {
+    output.innerHTML = "Invalid amount or insufficient balance.";
+  }
+}
+
+function deposit() {
+  const amount = parseFloat(prompt("Enter amount to deposit:"));
+  const account = user.accounts[user.selectedAccount];
+  const output = document.getElementById("output");
+
+  if (amount > 0) {
+    account.balance += amount;
+    account.history.push(`Deposited: $${amount}`);
+    output.innerHTML = `Deposit successful. New balance: $${account.balance}`;
+  } else {
+    output.innerHTML = "Invalid amount.";
+  }
+}
+
+function viewHistory() {
+  const output = document.getElementById("output");
+  const account = user.accounts[user.selectedAccount];
+  output.innerHTML = `<h3>Transaction History:</h3>` + account.history.join("<br>");
+}
+
+function logout() {
+  user.selectedAccount = null;
+  document.getElementById("account-selection").style.display = "none";
+  document.getElementById("atm-options").style.display = "none";
+  document.getElementById("scanner-status").textContent = "Place your finger on the scanner";
+  document.getElementById("scanner-status").style.color = "black";
+  document.getElementById("output").innerHTML = "";
+}
+  </script>
+</body>
+</html>
