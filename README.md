@@ -1,4 +1,4 @@
-# Fingerprint-Based ATM System:
+ # Fingerprint-Based ATM System:
 
 This project is a simulated ATM system that uses fingerprint recognition as a method for user authentication. The application is built with HTML, CSS, and JavaScript, offering a smooth and interactive user experience while demonstrating modern web development techniques.
 
